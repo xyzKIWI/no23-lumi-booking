@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NO.23 LUMI STUDIO｜預約</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  :root {
+    --paper: #fffcf8;
+    --ink: #2a2420;
+    --muted: #7a6a5e;
+    --line: #e8ddd3;
+    --gold: #bfa47e;
+    --brown: #6a4b3b;
+    --rose: #9d5f58;
+    --ok: #3d6b4f;
+    --chip: #f2e9e4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: linear-gradient(180deg, #fbf7f1 0%, #efe4d6 100%);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--paper); box-shadow: 0 0 40px rgba(60,40,25,.08); }
+  header {
+    padding: 22px 20px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  header .brand { letter-spacing: .18em; font-size: 12px; color: var(--muted); }
+  header h1 { font-family: "Playfair Display", "Noto Serif CJK TC", serif; font-weight: 500; font-size: 26px; margin-top: 4px; }
+  header p { color: var(--muted); margin-top: 6px; font-size: 13px; line-height: 1.65; }
+  .body { padding: 16px 18px 40px; }
+  .steps { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .steps i { font-style: normal; font-size: 11px; color: var(--muted); background: var(--chip); padding: 4px 8px; border-radius: 999px; }
+  .steps i.on { background: var(--brown); color: #fff; }
+  .svc { display: flex; flex-direction: column; gap: 8px; }
+  .group { margin: 14px 0 6px; font-size: 12px; letter-spacing: .16em; color: var(--muted); }
+  .card {
+    border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px;
+    background: #fff; display: flex; justify-content: space-between; gap: 10px; align-items: flex-start;
+  }
+  .card .nm { font-size: 15px; }
+  .card .tag { display: inline-block; margin-top: 4px; font-size: 11px; color: #fff; background: #c99a96; padding: 1px 8px; border-radius: 999px; }
+  .card .pr { text-align: right; white-space: nowrap; }
+  .card .pr .now { font-family: "Playfair Display", serif; font-size: 20px; color: var(--rose); }
+  .card .pr .old { font-size: 11px; color: var(--muted); text-decoration: line-through; }
+  .card .pr .min { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  button.btn {
+    display: block; width: 100%; border: 0; border-radius: 12px; padding: 13px 16px;
+    background: var(--brown); color: #fff; font-size: 15px; letter-spacing: .08em; cursor: pointer;
+    font-family: inherit;
+  }
+  button.btn:disabled { opacity: .4; cursor: not-allowed; }
+  button.ghost { background: transparent; color: var(--brown); border: 1px solid var(--line); margin-top: 8px; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+  .cal .hd { font-size: 11px; color: var(--muted); padding: 4px 0; }
+  .cal .d {
+    border: 0; background: var(--chip); border-radius: 10px; padding: 9px 0; font-size: 13px;
+    cursor: pointer; color: var(--ink); font-family: inherit;
+  }
+  .cal .d:disabled { opacity: .28; cursor: default; background: transparent; }
+  .cal .d.sel { background: var(--brown); color: #fff; }
+  .cal .d.open { background: #efe4d4; }
+  .slots { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+  .slots button {
+    border: 1.5px solid var(--line); background: #fff; border-radius: 999px;
+    padding: 8px 14px; cursor: pointer; font-family: inherit; font-size: 14px;
+  }
+  .slots button.sel { background: var(--brown); color: #fff; border-color: var(--brown); }
+  .slots button:disabled { opacity: .35; cursor: not-allowed; }
+  label.fld { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+  input[type=text], input[type=tel] {
+    width: 100%; border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 12px;
+    font-size: 16px; font-family: inherit; background: #fff; color: var(--ink);
+  }
+  .sum { background: var(--chip); border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+  .msg {
+    border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; background: #fff;
+    white-space: pre-wrap; font-size: 14px; line-height: 1.75; margin: 10px 0;
+  }
+  .msg h3 { font-size: 16px; margin-bottom: 6px; }
+  .notice { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 8px; }
+  .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">NO.23 LUMI STUDIO</div>
+    <h1>線上預約</h1>
+    <p>先選日期和時段。課程只當參考，到現場看膚況後再給建議。</p>
+  </header>
+  <div class="body" id="app"></div>
+</div>
+<script>
+const LIFF_ID = "";
+const SERVICES = [
+  { g: "SEYO 水光課程（優惠至 2026/12/31）", items: [
+    { id: "seyo-bubble", name: "碳酸啵啵（SEYO）", price: 2600, preg: true },
+    { id: "seyo-chloro", name: "葉綠素（SEYO）", price: 2800, preg: false },
+    { id: "seyo-pico", name: "液態皮秒（SEYO）", price: 2900, preg: true },
+    { id: "seyo-r2", name: "R2海綿白藻針（SEYO）", price: 2700, preg: true },
+  ]},
+  { g: "01 一般保養", items: [
+    { id: "clean", name: "清潔保養", price: 799, preg: false },
+    { id: "basic", name: "一般基礎保養", price: 999, orig: 1199, preg: false },
+  ]},
+  { g: "02 進階保養", items: [
+    { id: "ampoule", name: "進階安瓶保養", price: 1299, orig: 1499, preg: false },
+    { id: "foundation", name: "進階駐顏粉底保養", price: 1499, orig: 1699, preg: false },
+  ]},
+  { g: "03 套組系列深層保養", items: [
+    { id: "bubble", name: "碳酸啵啵", price: 1399, orig: 1599, preg: true },
+    { id: "goddess", name: "女神水光肌", price: 1599, orig: 1799, preg: false },
+    { id: "goddess-x", name: "女神水光肌 X 碳酸啵啵", price: 2299, orig: 2499, preg: true },
+    { id: "chloro", name: "葉綠素", price: 1599, orig: 1799, preg: false },
+    { id: "pico", name: "液態皮秒", price: 1699, orig: 1899, preg: true },
+    { id: "r2", name: "R2海綿白藻針", price: 1499, orig: 1650, preg: true },
+  ]},
+];
+const DURATION = 120;
+const DEFAULT_SERVICE = "皮膚管理";
+const SLOTS = {
+  "2026-11-09": ["11:30", "14:30"],
+  "2026-11-10": ["11:30", "14:30"],
+  "2026-11-20": ["11:30", "14:30"],
+  "2026-11-23": ["11:30", "14:30", "18:30"],
+  "2026-11-24": ["11:30", "14:30"],
+  "2026-11-25": ["11:30", "14:30"],
+  "2026-11-26": ["11:30", "14:30", "18:30"],
+  "2026-11-27": ["11:30", "14:30"],
+  "2026-11-30": ["11:30", "14:30", "18:30"],
+};
+const WEEKENDS_NOTE = "週六日請私訊 Phoebe，不會開放自助預約";
+const now = new Date();
+const KEY = "lumi-liff-booking-v1";
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { return null; }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+const seeded = [
+  { id: "seed-1123", date: "2026-11-23", time: "12:00", name: "（已登記）", service: "皮膚管理", status: "confirmed" },
+];
+
+let state = load() || {
+  step: 1,
+  date: null,
+  time: null,
+  name: "",
+  phone: "",
+  birthday: "",
+  bookings: seeded.slice(),
+  lastSubmit: null,
+  notify: null,
+};
+
+function overlaps(date, time) {
+  const start = toMin(time);
+  const end = start + DURATION;
+  return state.bookings.filter(b => b.date === date).some(b => {
+    const s = toMin(b.time);
+    const e = s + DURATION;
+    return start < e && end > s;
+  });
+}
+function toMin(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+function pastSlot(date, time) {
+  const [y, mo, d] = date.split("-").map(Number);
+  const [h, mi] = time.split(":").map(Number);
+  return new Date(y, mo - 1, d, h, mi) <= now;
+}
+function fmtLong(date, time) {
+  const [, mo, d] = date.split("-");
+  return `${Number(mo)}月${Number(d)}日 ${time}`;
+}
+function confirmationText(b) {
+  return `您好～已幫您預約成功 🤍
+
+📅 日期時間：${fmtLong(b.date, b.time)}
+✨ 項目：皮膚管理（現場看膚況後再建議課程）
+
+如需改期或取消，請在預約時間「提前 24 小時」告知 🙏
+
+有任何問題都可以直接跟我說～期待見面 ✨`;
+}
+function requestText(b) {
+  return `📅 預約申請
+姓名：${b.name}
+手機：${b.phone || "未填"}
+生日：${b.birthday || "未填"}
+時間：${fmtLong(b.date, b.time)}
+項目：皮膚管理（現場看膚況後再建議課程）`;
+}
+function courseCatalogHtml() {
+  let html = "";
+  for (const g of SERVICES) {
+    html += `<div class="group">${g.g}</div><div class="svc">`;
+    for (const it of g.items) {
+      html += `<div class="card">
+        <div><div class="nm">${it.name}</div>${it.preg?`<span class="tag">孕期不適用</span>`:""}</div>
+        <div class="pr"><div class="now">$${it.price.toLocaleString("zh-TW")}</div>
+        ${it.orig?`<div class="old">原價 $${it.orig.toLocaleString("zh-TW")}</div>`:""}
+        <div class="min">約 ${DURATION} 分鐘</div></div></div>`;
+    }
+    html += `</div>`;
+  }
+  return html;
+}
+function render() {
+  const el = document.getElementById("app");
+  if (state.step === 4) {
+    const last = state.lastSubmit;
+    const note = state.notify === "line"
+      ? "預約已傳到工作室的 LINE 對話。確認訊息會先由 Phoebe 看過草稿，她回「發」才會送出。"
+      : "這次是在瀏覽器預覽，所以還沒傳到 LINE 對話。從官方帳號的「預約療程」送出後，才會傳到工作室。";
+    el.innerHTML = `
+      <div class="steps"><i>1 選日期</i><i>2 課程參考</i><i>3 填資料</i><i class="on">完成</i></div>
+      <div class="msg"><h3>預約已送出</h3>${note}</div>
+      ${last ? `<div class="msg"><h3>預約內容</h3>${escapeHtml(confirmationText(last))}</div>` : ""}
+      <button class="btn ghost" type="button" id="again">再約一筆</button>`;
+    document.getElementById("again").onclick = () => {
+      state.step = 1; state.date = null; state.time = null;
+      state.name = ""; state.phone = ""; state.birthday = "";
+      save(); render();
+    };
+    return;
+  }
+  if (state.step === 1) {
+    el.innerHTML = `
+      <div class="steps"><i class="on">1 選日期</i><i>2 課程參考</i><i>3 填資料</i></div>
+      <p class="notice" style="margin-bottom:10px">一次 120 分鐘，同一時段只接一位。${WEEKENDS_NOTE}。</p>
+      <div class="row" style="margin-bottom:8px"><b>2026 年 11 月</b></div>
+      <div class="cal" id="cal"></div>
+      <div id="slotwrap"></div>`;
+    drawCal();
+    return;
+  }
+  if (state.step === 2) {
+    el.innerHTML = `
+      <div class="steps"><i>1 選日期</i><i class="on">2 課程參考</i><i>3 填資料</i></div>
+      <div class="sum">${fmtLong(state.date, state.time)}（約 ${DURATION} 分鐘）</div>
+      <div class="msg"><h3>課程參考</h3>以下是目前的價目參考，不必現在選擇。到現場後會先看膚況，再給你適合的建議。</div>
+      ${courseCatalogHtml()}
+      <button class="btn" type="button" id="next2" style="margin-top:16px">下一步</button>
+      <button class="btn ghost" type="button" id="back2">上一步</button>`;
+    document.getElementById("next2").onclick = () => { state.step = 3; save(); render(); };
+    document.getElementById("back2").onclick = () => { state.step = 1; save(); render(); };
+    return;
+  }
+  if (state.step === 3) {
+    el.innerHTML = `
+      <div class="steps"><i>1 選日期</i><i>2 課程參考</i><i class="on">3 填資料</i></div>
+      <div class="sum">${fmtLong(state.date, state.time)}（約 ${DURATION} 分鐘）<br>皮膚管理・現場看膚況後再建議課程</div>
+      <label class="fld">姓名</label>
+      <input type="text" id="name" value="${escapeAttr(state.name)}" placeholder="怎麼稱呼你">
+      <label class="fld">手機</label>
+      <input type="tel" id="phone" value="${escapeAttr(state.phone)}" placeholder="09xxxxxxxx">
+      <label class="fld">生日（月／日，不用年份）</label>
+      <input type="text" id="bday" value="${escapeAttr(state.birthday)}" placeholder="例如 12/06">
+      <button class="btn" type="button" id="send3" style="margin-top:14px">送出預約</button>
+      <button class="btn ghost" type="button" id="back3">上一步</button>`;
+    const bind = () => {
+      state.name = document.getElementById("name").value.trim();
+      state.phone = document.getElementById("phone").value.trim();
+      state.birthday = document.getElementById("bday").value.trim();
+    };
+    ["name","phone","bday"].forEach(id => document.getElementById(id).oninput = bind);
+    document.getElementById("back3").onclick = () => { bind(); state.step = 2; save(); render(); };
+    document.getElementById("send3").onclick = async () => {
+      bind();
+      if (!state.name) { alert("請填姓名"); return; }
+      const btn = document.getElementById("send3");
+      btn.disabled = true;
+      const b = {
+        id: "b-" + Date.now(),
+        date: state.date, time: state.time, name: state.name, phone: state.phone,
+        birthday: state.birthday, service: DEFAULT_SERVICE, status: "confirmed"
+      };
+      try {
+        state.notify = await notifyStudio(b);
+      } catch (e) {
+        state.notify = "local";
+      }
+      state.bookings.push(b);
+      state.lastSubmit = b;
+      state.step = 4;
+      save(); render();
+    };
+  }
+}
+function drawCal() {
+  const cal = document.getElementById("cal");
+  const dow = ["日","一","二","三","四","五","六"];
+  cal.innerHTML = dow.map(d => `<div class="hd">${d}</div>`).join("");
+  const first = new Date(2026, 10, 1);
+  for (let i = 0; i < first.getDay(); i++) cal.appendChild(document.createElement("div"));
+  for (let day = 1; day <= 30; day++) {
+    const date = `2026-11-${String(day).padStart(2,"0")}`;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = String(day);
+    btn.className = "d";
+    const open = !!SLOTS[date];
+    const avail = open && SLOTS[date].some(t => !overlaps(date, t) && !pastSlot(date, t));
+    btn.disabled = !avail;
+    if (avail) btn.classList.add("open");
+    if (state.date === date) btn.classList.add("sel");
+    btn.onclick = () => { state.date = date; state.time = null; save(); drawCal(); drawSlots(); };
+    cal.appendChild(btn);
+  }
+  drawSlots();
+}
+function drawSlots() {
+  const wrap = document.getElementById("slotwrap");
+  if (!wrap) return;
+  if (!state.date) { wrap.innerHTML = `<p class="notice" style="margin-top:12px">請先選有空的日期。</p>`; return; }
+  const times = SLOTS[state.date] || [];
+  wrap.innerHTML = `<p class="notice" style="margin:12px 0 8px">${state.date.slice(5).replace("-","/")} 可預約時段</p>
+    <div class="slots">${times.map(t => {
+      const blocked = overlaps(state.date, t) || pastSlot(state.date, t);
+      return `<button type="button" data-t="${t}" class="${state.time===t?"sel":""}" ${blocked?"disabled":""}>${t}</button>`;
+    }).join("")}</div>
+    <button class="btn" type="button" id="next1" ${state.time?"":"disabled"}>下一步</button>`;
+  wrap.querySelectorAll("[data-t]").forEach(b => b.onclick = () => {
+    state.time = b.getAttribute("data-t"); save(); drawCal();
+  });
+  const n = document.getElementById("next1");
+  if (n) n.onclick = () => { if (state.time) { state.step = 2; save(); render(); } };
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c]));
+}
+function escapeAttr(s) { return escapeHtml(s || ""); }
+async function notifyStudio(b) {
+  const text = requestText(b);
+  if (window.liff && LIFF_ID && typeof liff.sendMessages === "function" && liff.isInClient && liff.isInClient()) {
+    await liff.sendMessages([{ type: "text", text }]);
+    return "line";
+  }
+  return "local";
+}
+async function initLiff() {
+  if (!LIFF_ID || !window.liff) return;
+  try {
+    await liff.init({ liffId: LIFF_ID });
+  } catch (e) {}
+}
+initLiff().finally(render);
+</script>
+</div>
+</body>
+</html>
