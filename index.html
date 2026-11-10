@@ -335,7 +335,7 @@ function drawSlots() {
   if (n) n.onclick = () => { if (state.time) { state.step = 2; save(); render(); } };
 }
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ "&":"&","<":"<",">":">","\"":""","'":"&#39;" }[c]));
+  return String(s).replace(/[&<>"']/g, c => "&#" + c.charCodeAt(0) + ";");
 }
 function escapeAttr(s) { return escapeHtml(s || ""); }
 async function notifyStudio(b) {
