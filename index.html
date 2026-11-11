@@ -213,12 +213,14 @@ function render() {
   if (state.step === 4) {
     const last = state.lastSubmit;
     const note = state.notify === "line"
-      ? "預約已傳到工作室的 LINE 對話。確認訊息會先由 Phoebe 看過草稿，她回「發」才會送出。"
+      ? "已收到你的預約，工作室確認後會再回覆你 🤍"
       : "這次是在瀏覽器預覽，所以還沒傳到 LINE 對話。從官方帳號的「預約療程」送出後，才會傳到工作室。";
     el.innerHTML = `
       <div class="steps"><i>1 選日期</i><i>2 課程參考</i><i>3 填資料</i><i class="on">完成</i></div>
       <div class="msg"><h3>預約已送出</h3>${note}</div>
       ${last ? `<div class="msg"><h3>預約內容</h3>${escapeHtml(confirmationText(last))}</div>` : ""}
+      <div class="msg"><h3>預約須知</h3>來之前請先看一下 🤍</div>
+      <img src="notice.jpg" alt="預約須知：預約前須知、工作室規範、預約保留" style="width:100%;border-radius:14px;display:block;margin:0 0 14px">
       <button class="btn ghost" type="button" id="again">再約一筆</button>`;
     document.getElementById("again").onclick = () => {
       state.step = 1; state.date = null; state.time = null;
