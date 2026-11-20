@@ -64,6 +64,7 @@
   .cal .d:disabled { opacity: .28; cursor: default; background: transparent; }
   .cal .d.sel { background: var(--brown); color: #fff; }
   .cal .d.open { background: #efe4d4; }
+  .cal .d.open.sel { background: var(--brown); color: #fff; }
   .slots { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
   .slots button {
     border: 1.5px solid var(--line); background: #fff; border-radius: 999px;
@@ -83,6 +84,8 @@
   }
   .msg h3 { font-size: 16px; margin-bottom: 6px; }
   .notice { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 8px; }
+  .mnav { border: 1px solid var(--line); background: #fff; color: var(--brown); border-radius: 999px; width: 32px; height: 32px; font-size: 16px; cursor: pointer; font-family: inherit; line-height: 1; }
+  .mnav:disabled { opacity: .3; cursor: default; }
   .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 </style>
 </head>
@@ -125,6 +128,20 @@ const DURATION = 120;
 const DEFAULT_SERVICE = "皮膚管理";
 const SLOTS = {
   "2026-11-24": ["14:30"],
+  "2026-12-02": ["11:30", "14:30"],
+  "2026-12-03": ["11:30", "14:30"],
+  "2026-12-04": ["11:30", "14:30", "18:30"],
+  "2026-12-07": ["11:30", "14:30"],
+  "2026-12-09": ["11:30", "14:30"],
+  "2026-12-11": ["11:30", "14:30"],
+  "2026-12-17": ["11:30", "14:30", "18:30"],
+  "2026-12-18": ["11:30", "14:30"],
+  "2026-12-22": ["11:30", "14:30"],
+  "2026-12-23": ["11:30", "14:30", "18:30"],
+  "2026-12-25": ["11:30", "14:30"],
+  "2026-12-28": ["11:30", "14:30"],
+  "2026-12-29": ["11:30", "14:30"],
+  "2026-12-30": ["11:30", "14:30"],
 };
 const WEEKENDS_NOTE = "週六日請私訊 Phoebe，不會開放自助預約";
 const now = new Date();
@@ -167,6 +184,25 @@ function pastSlot(date, time) {
   const [y, mo, d] = date.split("-").map(Number);
   const [h, mi] = time.split(":").map(Number);
   return new Date(y, mo - 1, d, h, mi) <= now;
+}
+function monthHasFuture(ym) {
+  return Object.keys(SLOTS).some(d => d.slice(0, 7) === ym && SLOTS[d].some(t => !pastSlot(d, t)));
+}
+function availableMonths() {
+  const ms = [...new Set(Object.keys(SLOTS).map(d => d.slice(0, 7)))].sort();
+  const f = ms.filter(monthHasFuture);
+  return f.length ? f : ms.slice(-1);
+}
+function currentMonth() {
+  const ms = availableMonths();
+  if (!ms.includes(state.month)) {
+    state.month = (state.date && ms.includes(state.date.slice(0, 7))) ? state.date.slice(0, 7) : ms[0];
+  }
+  return state.month;
+}
+function monthLabel(ym) {
+  const [y, m] = ym.split("-").map(Number);
+  return `${y} 年 ${m} 月`;
 }
 function fmtLong(date, time) {
   const [, mo, d] = date.split("-");
@@ -230,9 +266,23 @@ function render() {
     el.innerHTML = `
       <div class="steps"><i class="on">1 選日期</i><i>2 課程參考</i><i>3 填資料</i></div>
       <p class="notice" style="margin-bottom:10px">一次 120 分鐘，同一時段只接一位。${WEEKENDS_NOTE}。</p>
-      <div class="row" style="margin-bottom:8px"><b>2026 年 11 月</b></div>
+      <div class="row" style="margin-bottom:8px">
+        <button type="button" class="mnav" id="mprev" aria-label="上個月">‹</button>
+        <b id="mlabel"></b>
+        <button type="button" class="mnav" id="mnext" aria-label="下個月">›</button>
+      </div>
       <div class="cal" id="cal"></div>
       <div id="slotwrap"></div>`;
+    const shift = (k) => {
+      const ms = availableMonths();
+      const i = ms.indexOf(currentMonth()) + k;
+      if (i < 0 || i >= ms.length) return;
+      state.month = ms[i];
+      if (!state.date || state.date.slice(0, 7) !== state.month) { state.date = null; state.time = null; }
+      save(); drawCal();
+    };
+    document.getElementById("mprev").onclick = () => shift(-1);
+    document.getElementById("mnext").onclick = () => shift(1);
     drawCal();
     return;
   }
@@ -293,10 +343,20 @@ function drawCal() {
   const cal = document.getElementById("cal");
   const dow = ["日","一","二","三","四","五","六"];
   cal.innerHTML = dow.map(d => `<div class="hd">${d}</div>`).join("");
-  const first = new Date(2026, 10, 1);
+  const ym = currentMonth();
+  const ms = availableMonths();
+  const mi = ms.indexOf(ym);
+  const lab = document.getElementById("mlabel");
+  if (lab) lab.textContent = monthLabel(ym);
+  const pv = document.getElementById("mprev"), nx = document.getElementById("mnext");
+  if (pv) { pv.disabled = mi <= 0; pv.style.visibility = ms.length > 1 ? "visible" : "hidden"; }
+  if (nx) { nx.disabled = mi >= ms.length - 1; nx.style.visibility = ms.length > 1 ? "visible" : "hidden"; }
+  const [cy, cm] = ym.split("-").map(Number);
+  const first = new Date(cy, cm - 1, 1);
+  const days = new Date(cy, cm, 0).getDate();
   for (let i = 0; i < first.getDay(); i++) cal.appendChild(document.createElement("div"));
-  for (let day = 1; day <= 30; day++) {
-    const date = `2026-11-${String(day).padStart(2,"0")}`;
+  for (let day = 1; day <= days; day++) {
+    const date = `${ym}-${String(day).padStart(2,"0")}`;
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = String(day);
